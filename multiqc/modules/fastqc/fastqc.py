@@ -849,7 +849,7 @@ class MultiqcModule(BaseMultiqcModule):
             try:
                 try:
                     pcnt = [float(d["percentage"]) for d in self.fastqc_data[s_name]["overrepresented_sequences"]]
-                    max_pcnt, total = max(pcnt), sum(pcnt)
+                    max_pcnt, total_pcnt = max(pcnt), sum(pcnt)
                     data[s_name]["total_overrepresented"] = total_pcnt
                     data[s_name]["top_overrepresented"] = max_pcnt
                     data[s_name]["remaining_overrepresented"] = total_pcnt - max_pcnt
