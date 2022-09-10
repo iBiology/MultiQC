@@ -847,13 +847,20 @@ class MultiqcModule(BaseMultiqcModule):
         for s_name in self.fastqc_data:
             data[s_name] = dict()
             try:
-                max_pcnt = max([float(d["percentage"]) for d in self.fastqc_data[s_name]["overrepresented_sequences"]])
-                total_pcnt = sum(
-                    [float(d["percentage"]) for d in self.fastqc_data[s_name]["overrepresented_sequences"]]
-                )
-                data[s_name]["total_overrepresented"] = total_pcnt
-                data[s_name]["top_overrepresented"] = max_pcnt
-                data[s_name]["remaining_overrepresented"] = total_pcnt - max_pcnt
+                try:
+                    pcnt = [float(d["percentage"]) for d in self.fastqc_data[s_name]["overrepresented_sequences"]]
+                    max_pcnt, total = max(pcnt), sum(pcnt)
+                    data[s_name]["total_overrepresented"] = total_pcnt
+                    data[s_name]["top_overrepresented"] = max_pcnt
+                    data[s_name]["remaining_overrepresented"] = total_pcnt - max_pcnt
+                except ValueError:
+                    if self.fastqc_data[s_name]["statuses"].get("overrepresented_sequences", "") == "pass":
+                        data[s_name]["total_overrepresented"] = 0
+                        data[s_name]["top_overrepresented"] = 0
+                        data[s_name]["remaining_overrepresented"] = 0
+                    else:
+                        del data[s_name]
+                        log.debug("Couldn't find data for {}, invalid Key".format(s_name))
             except KeyError:
                 if self.fastqc_data[s_name]["statuses"].get("overrepresented_sequences") == "pass":
                     data[s_name]["total_overrepresented"] = 0
